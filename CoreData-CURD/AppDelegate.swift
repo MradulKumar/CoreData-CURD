@@ -41,7 +41,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
          application to it. This property is optional since there are legitimate
          error conditions that could cause the creation of the store to fail.
         */
-        let container = NSPersistentContainer(name: "CoreData_CURD")
+        
+        let url = Bundle.main.url(forResource: "CoreData_CURD", withExtension: "momd")!
+
+        let momd = NSManagedObjectModel(contentsOf: url)!
+        
+        let psc = NSPersistentStoreCoordinator(managedObjectModel: momd)
+        do {
+            try psc.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: "TEST", at: url, options: nil)
+        } catch {
+            let nserror = error as NSError
+            fatalError("1. Unresolved error \(nserror), \(nserror.userInfo)")
+        }
+        
+        let moc = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.mainQueueConcurrencyType)
+        moc.persistentStoreCoordinator = psc
+
+        let container = NSPersistentContainer(name: "CoreData_CURD", managedObjectModel: momd)
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 // Replace this implementation with code to handle the error appropriately.
@@ -55,7 +71,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                  * The store could not be migrated to the current model version.
                  Check the error message to determine what the actual problem was.
                  */
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+                fatalError("2. Unresolved error \(error), \(error.userInfo)")
             }
         })
         return container
@@ -72,7 +88,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 // Replace this implementation with code to handle the error appropriately.
                 // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
                 let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+                fatalError("3. Unresolved error \(nserror), \(nserror.userInfo)")
             }
         }
     }
